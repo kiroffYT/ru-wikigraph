@@ -29,9 +29,7 @@ jobs:
 
       - name: Download Latest Dump (if changed)
         run: |
-          # Скрипт wget для загрузки ruwiki-latest-pages-articles.xml.bz2
-          # Здесь стоит добавить проверку MD5, чтобы не качать, если файл не обновился
-          wget https://dumps.wikimedia.org/ruwiki/latest/ruwiki-latest-pages-articles.xml.bz2 -O dump.xml.bz2
+          wget -q --show-progress https://dumps.wikimedia.org/ruwiki/latest/ruwiki-latest-pages-articles.xml.bz2 -O dump.xml.bz2
 
       - name: Run Processing
         env:

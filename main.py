@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     hf_token = os.getenv("HF_TOKEN")
-    repo_id = "твой-логин/ruwiki-graph-data" # ЗАМЕНИ НА СВОЙ
+    repo_id = "KirOFFyt/all-russian-wikipedia-data" # ЗАМЕНИ НА СВОЙ
     
     dump_file = "dump.xml.bz2"
     output_dir = "output"

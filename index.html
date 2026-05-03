@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Wiki Data Explorer</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #results { margin-top: 20px; background: #f4f4f4; padding: 15px; border-radius: 5px;}
+        .link-tag { display: inline-block; background: #007bff; color: white; padding: 3px 8px; margin: 3px; border-radius: 12px; font-size: 12px;}
+    </style>
+</head>
+<body>
+
+    <h1>Анализатор Википедии</h1>
+    
+    <div>
+        <input type="text" id="articleInput" placeholder="Название статьи (например: Россия)">
+        <button onclick="searchArticle()">Найти</button>
+    </div>
+
+    <div id="results">Здесь будут результаты...</div>
+
+    <script>
+        // API слой абстракции
+        class HFWikiAPI {
+            constructor(repoId) {
+                this.baseUrl = `https://huggingface.co/datasets/${repoId}/resolve/main`;
+                // Пример даты, в реальности должна выбираться через UI
+                this.currentDate = '03052026'; 
+            }
+
+            async _getHex(title) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(title);
+                const hashBuffer = await crypto.subtle.digest('MD5', data); // Требует доп. библиотеки или SHA-256
+                // Упрощенно для примера используем эмуляцию:
+                const hex = await this._sha256(title);
+                return [hex[0], hex[1]];
+            }
+
+            async _sha256(message) {
+                const msgBuffer = new TextEncoder().encode(message);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            async getArticle(title) {
+                const [d1, d2] = await this._getHex(title);
+                const safeTitle = title.replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '').trim();
+                const url = `${this.baseUrl}/${this.currentDate}/${d1}/${d2}/${safeTitle}.json`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Статья не найдена');
+                return response.json();
+            }
+        }
+
+        const api = new HFWikiAPI('твой_юзернейм/ruwiki-data');
+
+        async function searchArticle() {
+            const title = document.getElementById('articleInput').value;
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = "Загрузка...";
+            
+            try {
+                const data = await api.getArticle(title);
+                let linksHtml = data.links.slice(0, 50).map(l => `<span class="link-tag">${l}</span>`).join('');
+                if(data.links.length > 50) linksHtml += `<span class="link-tag">...и еще ${data.links.length - 50}</span>`;
+                
+                resultsDiv.innerHTML = `
+                    <h3>${data.title}</h3>
+                    <p><strong>Исходящих ссылок:</strong> ${data.links.length}</p>
+                    <div>${linksHtml}</div>
+                `;
+            } catch (e) {
+                resultsDiv.innerHTML = `<span style="color:red">Ошибка: ${e.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>

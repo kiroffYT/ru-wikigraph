@@ -1,0 +1,43 @@
+name: Wikipedia Data Pipeline
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Каждый день в 00:00 UTC
+  workflow_dispatch: # Ручной запуск
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Free Disk Space (Ubuntu)
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install mwxml networkx huggingface_hub requests
+
+      - name: Download Latest Dump (if changed)
+        run: |
+          # Скрипт wget для загрузки ruwiki-latest-pages-articles.xml.bz2
+          # Здесь стоит добавить проверку MD5, чтобы не качать, если файл не обновился
+          wget https://dumps.wikimedia.org/ruwiki/latest/ruwiki-latest-pages-articles.xml.bz2 -O dump.xml.bz2
+
+      - name: Run Processing
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python data_pipeline/main.py
+
+      - name: Cleanup dump to save space
+        run: rm dump.xml.bz2

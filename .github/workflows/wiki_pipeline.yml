@@ -37,7 +37,7 @@ jobs:
       - name: Run Processing
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: python data_pipeline/main.py
+        run: python ru-wikigraph/main.py
 
       - name: Cleanup dump to save space
         run: rm dump.xml.bz2

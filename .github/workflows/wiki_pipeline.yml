@@ -2,22 +2,19 @@ name: Wikipedia Data Pipeline
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Каждый день в 00:00 UTC
-  workflow_dispatch: # Ручной запуск
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Free Disk Space (Ubuntu)
+      - name: Free Disk Space
         run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /usr/share/dotnet /opt/ghc "/usr/local/share/boost"
           
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,14 +24,11 @@ jobs:
       - name: Install dependencies
         run: pip install mwxml networkx huggingface_hub requests
 
-      - name: Download Latest Dump (if changed)
+      - name: Download Dump
         run: |
           curl -L -o dump.xml.bz2 https://dumps.wikimedia.org/ruwiki/latest/ruwiki-latest-pages-articles.xml.bz2
 
-      - name: Run Processing
+      - name: Run
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python main.py
-
-      - name: Cleanup dump to save space
-        run: rm dump.xml.bz2

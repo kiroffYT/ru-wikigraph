@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def main():
     # 1. Настройки из переменных окружения
     hf_token = os.getenv("HF_TOKEN")
-    repo_id = "твой_юзернейм/ruwiki-data" # Замени на свой репозиторий
+    repo_id = "KirOFFyt/all-russian-wikipedia-data" # Замени на свой репозиторий
     
     dump_file = "dump.xml.bz2"
     output_dir = "output_data"

@@ -48,7 +48,7 @@ def process_dump(dump_path, db_path):
             total_counter += 1
             
             if page.namespace != 0:
-                if total_counter % 100000 == 0:
+                if total_counter % 10000 == 0:
                     print(f"Пропущено {total_counter} служебных страниц...")
                 continue
                 
@@ -66,7 +66,7 @@ def process_dump(dump_path, db_path):
                 for link in out_links:
                     batch.append((title, link))
                 
-                if len(batch) >= 100000: # Можно увеличить батч для скорости
+                if len(batch) >= 10000: # Можно увеличить батч для скорости
                     cursor.executemany("INSERT INTO links VALUES (?, ?)", batch)
                     conn.commit()
                     batch = []

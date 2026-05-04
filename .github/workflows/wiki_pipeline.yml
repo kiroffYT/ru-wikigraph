@@ -2,7 +2,7 @@ name: Wikipedia Data Pipeline
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Раз в сутки
+    - cron: '17 1 * * *' # Раз в сутки
   workflow_dispatch: # Ручной запуск
 
 jobs:
